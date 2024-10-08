@@ -19,7 +19,7 @@
 
 ## FrameWork
 
-C
+Java, MySQL
 
 ## 1. 프로젝트 명
 
