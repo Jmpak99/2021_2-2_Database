@@ -1,0 +1,111 @@
+package com.company;
+
+import java.awt.*;
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.*;
+
+public class LoginScreen extends JFrame {
+	private Connection con = null;
+	private static PreparedStatement pstmt = null;
+	private ResultSet rs;
+	String url = "jdbc:mysql://localhost:3306/restarea";
+	String user = "root";
+	String pw = "dBTue03";
+	private JFrame frame;
+
+	public LoginScreen() {
+		try {
+			Class.forName("com.mysql.cj.jdbc.Driver");
+			con = DriverManager.getConnection(url, user, pw);
+			System.out.println("Connect Successful");
+
+		} catch (Exception e1) {
+			System.out.println("Connect Failed");
+			e1.printStackTrace();
+
+		}
+
+		setTitle("로그인 화면");
+		frame = new JFrame();
+		frame.setBounds(100, 100, 600, 550);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.getContentPane().setLayout(null);
+		frame.setVisible(true);
+
+		JLabel login = new JLabel("휴게소 종합리뷰");
+		login.setFont(new Font("휴먼둥근헤드라인", Font.PLAIN, 50));
+		login.setHorizontalAlignment(SwingConstants.CENTER);
+		login.setBounds(0, 52, 584, 114);
+		frame.getContentPane().add(login);
+
+		JLabel idPanel = new JLabel("ID");
+		idPanel.setFont(new Font("굴림", Font.PLAIN, 20));
+		idPanel.setBounds(56, 223, 32, 40);
+		frame.getContentPane().add(idPanel);
+
+		JTextField IdText = new JTextField();
+		IdText.setBounds(119, 223, 429, 40);
+		frame.getContentPane().add(IdText);
+
+		JLabel PwPanel = new JLabel("PW");
+		PwPanel.setFont(new Font("굴림", Font.PLAIN, 20));
+		PwPanel.setBounds(56, 289, 36, 40);
+		frame.getContentPane().add(PwPanel);
+
+		JPasswordField PwField = new JPasswordField();
+		PwField.setBounds(119, 290, 429, 40);
+		frame.getContentPane().add(PwField);
+
+		JButton LoginBtn = new JButton("로그인");
+		LoginBtn.setBounds(56, 368, 492, 38);
+		frame.getContentPane().add(LoginBtn);
+
+		JButton SignupBtn = new JButton("회원가입");
+		SignupBtn.setBounds(56, 425, 492, 38);
+		frame.getContentPane().add(SignupBtn);
+
+		// 로그인 버튼 클릭 시
+		LoginBtn.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+				try {
+					String sql = "SELECT user_PASSWORD FROM userlogin WHERE user_ID = ? ";
+					PreparedStatement pstmt = con.prepareStatement(sql); // pstmt 변수에 sql문 넣기
+					pstmt.setString(1, IdText.getText()); // sql문에서 ?에 해당하는 값에 userID를 집어넣음
+					rs = pstmt.executeQuery(); // sql 수행결과를 rs에 저장
+					if (rs.next()) {
+						// ?로 사용자에게 받은 ID와 비밀번호가 일치하는 경우
+						if (rs.getString(1).contentEquals(PwField.getText())) {
+							// 로그인 성공
+							JOptionPane.showMessageDialog(null, "로그인을 성공했습니다");
+							new Layout3(new RestareaDao().selectName(null));
+							frame.dispose();
+							pstmt.close();
+							con.close();
+						} else {
+							JOptionPane.showMessageDialog(null, "비밀번호가 틀립니다");
+						}
+					}
+				} catch (Exception e1) {
+					e1.printStackTrace();
+					JOptionPane.showMessageDialog(null, "로그인을 실패하였습니다");
+				}
+			}
+
+		});
+
+		// 회원가입 버튼 클릭 시
+		SignupBtn.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+
+				new JoinScreen();
+
+			}
+		});
+
+	}
+
+}
